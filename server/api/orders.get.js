@@ -54,6 +54,8 @@ export default defineEventHandler(async () => {
 
 		pickupNames.map(name => {
 			name.ready = name.orders.length > 0 && name.orders.every(order => order.status == OrderStatus.pickup)
+
+			if(name.ready) name.completedAt = new Date()
 		})
 
 		

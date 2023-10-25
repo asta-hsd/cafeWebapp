@@ -73,7 +73,6 @@ export default {
 		const synth = window.speechSynthesis;
 		$io.on(SocketEvent.pickupOrder,(readyName) => {
 			console.log("new pickup")
-			useState('pickupNames').value.find(name=>name.name == readyName.name) = readyName
 			// const utterThis = new SpeechSynthesisUtterance(name.name);
 			
 			// const german = speechSynthesis.getVoices().filter(voice => voice.lang.startsWith('de'))[0]
@@ -116,7 +115,8 @@ export default {
 			})
 		},
 		getElapsedTime(name) {
-			return Math.floor((this.currentTime - name.completedAt)/1000)
+			// console.log(this.currentTime + ", " + new Date(name.completedAt))
+			return Math.floor((this.currentTime - new Date(name.completedAt))/1000)
 		},
 		testSpeech(text) {
 			const synth = window.speechSynthesis;
