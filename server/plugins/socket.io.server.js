@@ -1,5 +1,5 @@
 import { Server } from 'socket.io'
-import { OrderStatus, SocketEvent } from "~/utils/enums";
+import { OrderStatus, SocketEvent } from "../utils/index";
 import { OrderModel } from '../models';
 
 export default defineNitroPlugin((nitroApp) => {
