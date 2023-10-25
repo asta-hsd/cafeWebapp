@@ -33,6 +33,7 @@ export default defineNitroPlugin((nitroApp) => {
 				let orderName = resp.pickupNames.find(name => name.name == order.pickupName)
 
 				if(orderName.ready) {
+					orderName.completedAt = new Date()
 					socketServer.emit(SocketEvent.pickupOrder, orderName)
 				}
 			}

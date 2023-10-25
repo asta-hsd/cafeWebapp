@@ -115,7 +115,7 @@ export default {
 			})
 		},
 		getElapsedTime(name) {
-			return Math.floor((this.currentTime - new Date(name.orders[0].updatedAt))/1000)
+			return Math.floor((this.currentTime - name.completedAt)/1000)
 		},
 		testSpeech(text) {
 			const synth = window.speechSynthesis;
