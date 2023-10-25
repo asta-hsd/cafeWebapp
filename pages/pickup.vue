@@ -71,8 +71,9 @@ export default {
 
 		const { $io } = useNuxtApp()
 		const synth = window.speechSynthesis;
-		$io.on(SocketEvent.pickupOrder,(name) => {
+		$io.on(SocketEvent.pickupOrder,(readyName) => {
 			console.log("new pickup")
+			useState('pickupNames').value.find(name=>name.name == readyName.name) = readyName
 			// const utterThis = new SpeechSynthesisUtterance(name.name);
 			
 			// const german = speechSynthesis.getVoices().filter(voice => voice.lang.startsWith('de'))[0]
