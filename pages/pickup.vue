@@ -24,7 +24,7 @@
 			<ul class="pickupList">
 				<transition-group name="list" tag="div">
 					<template v-for="(name,index) in orderedOrders" :key="index">
-				<li @click="completePickup(name)" v-if="name.ready" :style="{'--timePerc': 100-(getElapsedTime(name)/maxPickupTime)*100 + '%'}">
+				<li @click="completePickup(name)" v-if="name.ready" :style="{'--timePerc': 100-(getElapsedTime(name)/maxPickupTime)*100 + '%', '--timeHue': 100-(getElapsedTime(name)/maxPickupTime)*100}">
 					<p>{{ name.name }}</p>
 					<span v-for="order in name.orders">{{ order.orderType }} 
 						<svg v-if="order.status == OrderStatus.pickup" viewBox="0 0 40 28" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -188,7 +188,8 @@ ul, ul > div {
 	height: 10px;
 	width: var(--timePerc);
 	transition: all 0.2s;
-	background-color: color-mix(in hwb shorter hue, #ff4343, #80C587 var(--timePerc));
+	// background-color: color-mix(in hwb shorter hue, #ff4343, #80C587 var(--timePerc));
+	background-color: hsl(calc(var(--timeHue)), 80%, 50%);
 }
 
 li {
