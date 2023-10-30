@@ -54,8 +54,13 @@ export default defineEventHandler(async () => {
 
 		pickupNames.map(name => {
 			name.ready = name.orders.length > 0 && name.orders.every(order => order.status == OrderStatus.pickup)
-
-			if(name.ready) name.completedAt = new Date()
+			if(name.ready) {
+				name.completedAt = name.orders.reduce((prev,curr) => {
+					return (prev && prev.updatedAt > curr.updatedAt) ? prev : curr
+				}).updatedAt
+				console.log(name)
+			}
+				
 		})
 
 		

@@ -9,14 +9,14 @@
 				<slot>
 				</slot>
 			</div>
-			<div class="Backdrop"/>
+			<div class="Backdrop" @click="close"/>
 		</div>
 	</Transition>
 </template>
 <script>
     
     export default {
-        props: ['buttonColor', 'show'],
+        props: ['buttonColor', 'show','closeOnBackdrop'],
         emits: [
             "close"
         ],

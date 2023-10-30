@@ -6,13 +6,16 @@
 			<div class="orderMenu">
 				<h2>Kaffee</h2>
 				<ul>
-					<li v-for="orderType in useState('orderTypes').value" @click="showDetails = true;selectedOrder=orderType">{{ orderType.name }}</li>
+					<li v-for="orderType in useState('orderTypes').value" @click="clickMenuItem(orderType)">
+						<p>{{ orderType.name }}</p>
+						<span>{{ orderType.price }} €</span>	
+					</li>
 				</ul>
 			</div>
 			<div class="receipt">
 				<ul>
 					<li v-for="(order,index) in addedOrders">
-						<div class="order"><span style="flex-grow: 1">{{ order.orderType }}</span>
+						<div class="order"><span style="flex-grow: 1">{{ order.orderType.name }}</span>
 							<span style="text-wrap: nowrap;">{{ order.price }} €</span>
 							<svg @click="addedOrders.splice(index,1)" class="btn" viewBox="0 0 23 23" fill="none" xmlns="http://www.w3.org/2000/svg">
 								<path d="M3 3L20 20M20 3L3 20" stroke="#B75252" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
@@ -25,10 +28,11 @@
 					Summe: <span>{{ totalPrice }} €</span>
 					<p>Name: {{ pickupName }}</p>
 					<div class="button" @click="sendOrder()">Bestellen</div>
+					<div class="button secondary" @click="showReturn=true">Rückgeld</div>
 				</div>
 			</div>
 		</div>
-		<Modal :show="showDetails" @close="showDetails=false" buttonColor="#736C5A">
+		<Modal :show="showDetails" @close="cancel()" buttonColor="#736C5A">
 			<div v-if="selectedOrder" class="orderDetails">
 				<h2>{{ selectedOrder.name }}</h2>
 				<ul v-for="cat in optionCategories">
@@ -43,6 +47,15 @@
 				</div>
 			</div>
 		</Modal>
+
+		<Modal :show="showReturn" @close="cancel()" buttonColor="#736C5A">
+			<div class="returnScreen">
+				<span class="input">Eingabe: {{ moneyInput }}€</span>
+				<span class="output">Rückgeld:  {{ Math.max(0,(moneyInput - totalPrice).toFixed(2)) }}€</span>
+				<SimpleKeyboard @onChange="onChange" @onKeyPress="onKeyPress" :input="moneyInput"/>
+				<div class="button" @click="sendOrder()">Bestellen</div>
+			</div>
+		</Modal>
 	</div>
 </template>
 
@@ -54,6 +67,8 @@ export default {
 		return {
 			showDetails: false,
 			selectedOrder: null,
+			showReturn: false,
+			moneyInput: 0,
 			addedOrders: [],
 		}
 	},
@@ -61,7 +76,7 @@ export default {
 		addOrder() {
 			let options = useState('options').value.filter(option => option.selected)
 			this.addedOrders.push({
-				orderType: this.selectedOrder.name,
+				orderType: this.selectedOrder,
 				options: options.map(option => option.name),
 				status: OrderStatus.ordered,
 				price: this.selectedOrder.price + options.reduce((acc,option) => acc + option.price, 0)
@@ -70,19 +85,43 @@ export default {
 		},
 		cancel() {
 			this.showDetails = false
+			this.moneyInput = 0
+			this.showReturn = false
 			useState('options').value.map(opt => {opt.selected = false})
 		},
 		sendOrder() {
 			this.addedOrders.map((order) => {
-				order.pickupName = this.pickupName
-				const { $io } = useNuxtApp()
-				$io.emit(SocketEvent.newOrder,order)
+				console.log(order.orderType + ", " + order.orderType)
+				if(!order.orderType.ignoreOrders) {
+					order.orderType = order.orderType.name
+					order.pickupName = this.pickupName
+					const { $io } = useNuxtApp()
+					$io.emit(SocketEvent.newOrder,order)
+				}
 			})
 			this.selectedOrder = null;
-			this.addedOrders = []
+			this.addedOrders = [];
+			this.cancel()
 		},
 		randomInteger(min, max) {
   			return Math.floor(Math.random() * (max - min + 1)) + min;
+		},
+		onChange(input) {
+			this.moneyInput = input;
+		},
+		onKeyPress(button) {
+			console.log("button", button);
+		},
+		onInputChange(input) {
+			this.moneyInput = input.target.value;
+		},
+		clickMenuItem(type) {
+			this.selectedOrder=type
+			if(type.ignoreOrders) {
+				this.addOrder()
+			} else {
+				this.showDetails = true;
+			}
 		}
 	},
 	computed: {
@@ -187,6 +226,11 @@ export default {
     width: 150px;
     border-radius: 10px;
     text-align: center;
+	&.secondary {
+		background-color: #ffe3a5;
+		padding: 10px;
+		color: inherit;
+	}
   }
 
   .button {
@@ -236,7 +280,7 @@ export default {
 
   .orderMenu li, .orderDetails li {
     border-radius: 10px;
-    width: 150px;
+    width: 140px;
     background: #ffe3a5;
     margin: 20px;
     margin-left: 0;
@@ -253,6 +297,14 @@ export default {
     &.selected {
       background: #FCB759;
       color: white;
+    }
+
+	p {
+      margin: 0;
+    }
+
+    span {
+      font-size: 15px;
     }
   }
 
@@ -277,5 +329,22 @@ export default {
     }
   }
 }
+
+.returnScreen {
+	width: 500px;
+	background: #FFF4DA;
+    padding: 30px;
+  }
+  .returnScreen span {
+    background: #FFFBF1;
+    padding: 20px;
+    width: 100%;
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    font-size: 20px;
+	margin: 10px 0;
+  }
 
 </style>

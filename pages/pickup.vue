@@ -78,7 +78,7 @@ export default {
 			// const german = speechSynthesis.getVoices().filter(voice => voice.lang.startsWith('de'))[0]
 			// utterThis.voice = german
 			// synth.speak(utterThis)
-			this.sound.play()
+			// this.sound.play()
 		})
 
 	},
