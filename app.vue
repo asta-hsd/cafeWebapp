@@ -42,14 +42,6 @@
 	});
 </script>
 
-<script>
-export default {
-	methods: {
-
-	}
-}
-</script>
-
 <style>
 * {
 	box-sizing: border-box;

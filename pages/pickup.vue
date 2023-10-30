@@ -9,7 +9,7 @@
 					<template v-for="(name,index) in orderedOrders" :key="index">
 				<li v-if="!name.ready">
 					<p>{{ name.name }}</p>
-					<span v-for="order in name.orders">{{ order.orderType }} 
+					<span v-for="order in name.orders">{{ order.orderType }} {{ order.options.includes('Hafer') ? '(H)':'' }}
 						<svg v-if="order.status == OrderStatus.pickup" viewBox="0 0 40 28" fill="none" xmlns="http://www.w3.org/2000/svg">
 							<path d="M4.81306 12.9036L15.8905 23.981L35.8299 4.04161" stroke="#80C587" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
 						</svg>
@@ -122,9 +122,6 @@ export default {
 			const synth = window.speechSynthesis;
 			const utterThis = new SpeechSynthesisUtterance(text);
 			
-			
-
-
 			const german = speechSynthesis.getVoices().filter(voice => voice.lang.startsWith('de'))[0]
 			utterThis.voice = german
 
