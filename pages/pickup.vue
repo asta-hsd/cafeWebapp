@@ -51,7 +51,6 @@ export default {
 		return {
 			currentTime: new Date(),
 			maxPickupTime: 3*60,
-			sound: new Audio('/cashSound.mp3')
 		}
 	},
 	created() {
@@ -70,15 +69,11 @@ export default {
 		console.log(this.maxPickupTime)
 
 		const { $io } = useNuxtApp()
-		const synth = window.speechSynthesis;
-		$io.on(SocketEvent.pickupOrder,(readyName) => {
+		$io.on(SocketEvent.pickupOrder,async (readyName) => {
 			console.log("new pickup")
-			// const utterThis = new SpeechSynthesisUtterance(name.name);
-			
-			// const german = speechSynthesis.getVoices().filter(voice => voice.lang.startsWith('de'))[0]
-			// utterThis.voice = german
-			// synth.speak(utterThis)
-			// this.sound.play()
+			let rand = Math.floor(Math.random() * (3 - 1) + 1);
+			let sound = new Audio('/sound'+rand+'.mp3')
+			sound.play()
 		})
 
 	},

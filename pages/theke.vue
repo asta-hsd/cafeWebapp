@@ -70,6 +70,7 @@ export default {
 			showReturn: false,
 			moneyInput: 0,
 			addedOrders: [],
+			pickupNameSet: ''
 		}
 	},
 	methods: {
@@ -140,7 +141,9 @@ export default {
 		pickupName() {
 			if(useState('availableNames').value && useState('availableNames').value.length > 0) {
 				let availableNames = useState('availableNames').value.map(name => name.name)
-				return availableNames[Math.floor(Math.random() * availableNames.length)];
+
+				if(!this.pickupNameSet || !availableNames.includes(this.pickupNameSet)) this.pickupNameSet = availableNames[Math.floor(Math.random() * availableNames.length)];
+				return this.pickupNameSet
 			} 
 		}
 	},
