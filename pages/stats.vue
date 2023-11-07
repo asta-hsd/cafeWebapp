@@ -48,7 +48,7 @@ export default {
 					this.orders = data.value
 					this.stats.Shots = orders.reduce((acc,curr) => {
 						if(curr.options.includes('Doppelt')) return acc + 2
-						if(curr.orderType.shots) return acc + curr.orderType.shots
+						if(curr.orderType.shots) return acc + Number(curr.orderType.shots)
 						return acc
 					}, 0)
 
