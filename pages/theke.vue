@@ -93,12 +93,15 @@ export default {
 		sendOrder() {
 			this.addedOrders.map((order) => {
 				console.log(order.orderType + ", " + order.orderType)
-				if(!order.orderType.ignoreOrders) {
-					order.orderType = order.orderType.name
-					order.pickupName = this.pickupName
-					const { $io } = useNuxtApp()
-					$io.emit(SocketEvent.newOrder,order)
+				if(order.orderType.ignoreOrders) {
+					order.status = OrderStatus.done
+					order.pickupName = ''
+				} else {
+					order.pickupName = this.pickupNameSet
 				}
+				order.orderType = order.orderType.name
+				const { $io } = useNuxtApp()
+				$io.emit(SocketEvent.newOrder,order)
 			})
 			this.selectedOrder = null;
 			this.addedOrders = [];

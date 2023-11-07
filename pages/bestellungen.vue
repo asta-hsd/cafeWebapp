@@ -5,7 +5,7 @@
 	<ul>
         <transition-group name="list" tag="p">
             <template v-if="useState('orders').value" v-for="(order, index) in useState('orders').value">
-                <li v-if="order.status == OrderStatus.ordered">
+                <li v-if="order.status == OrderStatus.ordered" @click="clickedOrder=order">
                     <span
                         >{{ order.orderType }}
                         {{
@@ -24,7 +24,7 @@
                     >
                         Name: {{ order.pickupName }}
                         <svg
-                            @click="completeOrder(order)"
+                            @click.stop="completeOrder(order)"
                             class="btn"
                             viewBox="0 0 47 47"
                             fill="none"
@@ -48,7 +48,12 @@
                 </li>
             </template>
         </transition-group>
-
+		<Modal :show="clickedOrder" @close="clickedOrder=null" buttonColor="black" closeOnBackdrop>
+			<div v-if="clickedOrder" class="orderDetails">
+				<h2>{{ clickedOrder.orderType }}</h2>
+				<p>Bestellt: {{ new Date(clickedOrder.createdAt).getHours() + ":" + new Date(clickedOrder.createdAt).getMinutes() }} Uhr</p>
+			</div>
+		</Modal>
     </ul>
 </div>
 </template>
@@ -64,7 +69,8 @@ definePageMeta({
 export default {
 	data() {
 		return {
-			orders: []
+			orders: [],
+			clickedOrder: null,
 		}
 	},
 	methods: {
@@ -152,5 +158,15 @@ ul {
   transition: all 1s;
 }
 
+.orderDetails {
+    background: #FFF4DA;
+    padding: 30px;
+
+    h2 {
+      font-family: 'Nunito';
+      margin: 0;
+      text-align: center;
+    }
+  }
 
 </style>

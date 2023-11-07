@@ -11,6 +11,9 @@
 			<NuxtLink to="/pickup">
 				<li>Abholung</li>
 			</NuxtLink>
+			<NuxtLink to="/stats">
+				<li>Stats</li>
+			</NuxtLink>
 		</ul>
 	</div>
 </template>
