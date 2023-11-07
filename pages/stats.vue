@@ -5,8 +5,8 @@
 		<div class="datePickers">
 			<!-- <div>Von:<vue-date-picker v-model="startDate" placeholder="Von" @update:model-value="updateOrders"/></div>
 			<div>Bis:<vue-date-picker v-model="endDate" placeholder="Bis" @update:model-value="updateOrders"/></div> -->
-			<div>Von:<input class="input" type="date" v-model="startDate" /></div>
-			<div>Bis:<input class="input" type="date" v-model="endDate" /></div>
+			<div>Von:<input class="input" type="date" v-model="startDate" @change="updateOrders()" /></div>
+			<div>Bis:<input class="input" type="date" v-model="endDate" @change="updateOrders()" /></div>
 		</div>
 		<ul>
 			<li v-for="(value, name, index) in stats">
@@ -29,8 +29,8 @@
 export default {
 	data() {
 		return {
-			startDate: Date.now(),
-			endDate: Date.now(),
+			startDate: null,
+			endDate: null,
 			stats: {
 				Shots: 0,
 				Einnahmen: '0 €'
@@ -42,7 +42,7 @@ export default {
 		async updateOrders() {
 			if(this.startDate && this.endDate) {
 				const { data, error } = await useFetch("/api/orderStats", {
-					query: { startDate: this.startDate.toISOString(), endDate: this.endDate.toISOString() }
+					query: { startDate: new Date(this.startDate + 'T00:00').toISOString(), endDate: new Date(this.endDate + 'T00:00').toISOString() }
 				});
 				if(!error.value) {
 					console.log(data.value)
