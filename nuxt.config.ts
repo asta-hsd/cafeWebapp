@@ -20,7 +20,6 @@ export default defineNuxtConfig({
 	},
 	plugins: [
 		'./plugins/socket.io',
-		'./plugins/VueDatePicker'
 	],
 	// nitro: {
 	// 	plugins: [
