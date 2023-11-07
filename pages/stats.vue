@@ -13,8 +13,6 @@
 				<p>{{ name }}</p>
 				<span>{{ value }}</span>
 			</li>
-		</ul>
-		<ul>
 			<li v-for="ordertype in ordertypeCounters">
 				<p>{{ ordertype.name }}</p>
 				<span>{{ ordertype.count }}</span>
@@ -98,8 +96,9 @@ ul {
   flex-wrap: wrap;
   padding: 0;
   margin: 0;
-  max-height: 100%;
+  max-height: 50vh;
   overflow: scroll;
+  padding-bottom: 80px;
 }
 ul li {
   border-radius: 10px;
