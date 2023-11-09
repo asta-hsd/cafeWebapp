@@ -54,6 +54,7 @@
 				<span class="output">Rückgeld:  {{ Math.max(0,(moneyInput - totalPrice).toFixed(2)) }}€</span>
 				<SimpleKeyboard @onChange="onChange" @onKeyPress="onKeyPress" :input="moneyInput"/>
 				<div class="button" @click="sendOrder()">Bestellen</div>
+				<span style="font-size: 15px;"><input type="checkbox" v-model="devTest"/>Devtest</span>
 			</div>
 		</Modal>
 	</div>
@@ -70,7 +71,8 @@ export default {
 			showReturn: false,
 			moneyInput: 0,
 			addedOrders: [],
-			pickupNameSet: ''
+			pickupNameSet: '',
+			devTest: false
 		}
 	},
 	methods: {
@@ -80,7 +82,6 @@ export default {
 				orderType: this.selectedOrder,
 				options: options.map(option => option.name),
 				status: OrderStatus.ordered,
-				devTest: false,
 				price: this.selectedOrder.price + options.reduce((acc,option) => acc + option.price, 0)
 			})
 			this.cancel()
@@ -89,6 +90,7 @@ export default {
 			this.showDetails = false
 			this.moneyInput = 0
 			this.showReturn = false
+			this.devTest = false
 			useState('options').value.map(opt => {opt.selected = false})
 		},
 		sendOrder() {
@@ -101,6 +103,7 @@ export default {
 					order.pickupName = this.pickupNameSet
 				}
 				order.orderType = order.orderType.name
+				order.devTest = this.devTest
 				const { $io } = useNuxtApp()
 				$io.emit(SocketEvent.newOrder,order)
 			})
@@ -352,6 +355,7 @@ export default {
     justify-content: space-between;
     font-size: 20px;
 	margin: 10px 0;
+	display: inline-block;
   }
 
 </style>

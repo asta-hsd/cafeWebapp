@@ -44,8 +44,8 @@ export default {
 				});
 				if(!error.value) {
 					console.log(data.value)
-					let orders = data.value
-					this.orders = data.value
+					let orders = data.value.filter(order => !order.devTest)
+					this.orders = orders
 					this.stats.Shots = orders.reduce((acc,curr) => {
 						if(curr.options.includes('Doppelt')) return acc + 2
 						if(curr.orderType.shots) return acc + Number(curr.orderType.shots)
