@@ -80,6 +80,7 @@ export default {
 				orderType: this.selectedOrder,
 				options: options.map(option => option.name),
 				status: OrderStatus.ordered,
+				devTest: false,
 				price: this.selectedOrder.price + options.reduce((acc,option) => acc + option.price, 0)
 			})
 			this.cancel()

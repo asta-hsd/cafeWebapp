@@ -5,7 +5,8 @@ const orderSchema = new mongoose.Schema({
 	options: [String],
 	pickupName: String,
 	status: {type: String, enum: ['ordered','pickup','done'], required: true },
-	price: Number
+	price: Number,
+	devTest: Boolean
 }, { timestamps: true })
 
 const orderTypeSchema = new mongoose.Schema({
