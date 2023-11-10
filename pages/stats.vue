@@ -3,10 +3,8 @@
 		<BackButton back="/"/>
 		<h1>Stats</h1>
 		<div class="datePickers">
-			<!-- <div>Von:<vue-date-picker v-model="startDate" placeholder="Von" @update:model-value="updateOrders"/></div>
-			<div>Bis:<vue-date-picker v-model="endDate" placeholder="Bis" @update:model-value="updateOrders"/></div> -->
-			<div>Von:<input class="input" type="date" v-model="startDate" @change="updateOrders()" /></div>
-			<div>Bis:<input class="input" type="date" v-model="endDate" @change="updateOrders()" /></div>
+			<div>Von:<vue-date-picker v-model="startDate" placeholder="Von" @update:model-value="updateOrders"/></div>
+			<div>Bis:<vue-date-picker v-model="endDate" placeholder="Bis" @update:model-value="updateOrders"/></div>
 		</div>
 		<ul>
 			<li v-for="(value, name, index) in stats">
@@ -80,15 +78,14 @@ h1 {
 	text-align: center;
 }
 .datePickers {
-	display: flex;
-	flex-direction: row;
-	width: 100%;
-}
-
-.datePickers > div {
-	flex-grow: 1;
-	margin: 20px;
-}
+ 	display: flex;
+ 	flex-direction: row;
+ 	width: 100%;
+ }
+ .datePickers > div {
+ 	flex-grow: 1;
+ 	margin: 20px;
+ }
 
 ul {
   list-style: none;

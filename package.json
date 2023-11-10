@@ -17,6 +17,7 @@
     "vue-router": "^4.2.5"
   },
   "dependencies": {
+    "@vuepic/vue-datepicker": "6",
     "mongoose": "^7.5.3",
     "nuxt-socket-io": "^3.0.13",
     "simple-keyboard": "^3.7.25",
