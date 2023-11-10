@@ -4,13 +4,15 @@
 		<h1>Theke</h1>
 		<div class="wrapper">
 			<div class="orderMenu">
-				<h2>Kaffee</h2>
-				<ul>
-					<li v-for="orderType in useState('orderTypes').value" @click="clickMenuItem(orderType)">
-						<p>{{ orderType.name }}</p>
-						<span>{{ orderType.price }} €</span>	
-					</li>
-				</ul>
+				<div v-for="category in orderTypeCategories">
+					<h2>{{category.name}}</h2>
+					<ul>
+						<li v-for="orderType in category.orderTypes" @click="clickMenuItem(orderType)">
+							<p>{{ orderType.name }}</p>
+							<span>{{ orderType.price }} €</span>	
+						</li>
+					</ul>
+				</div>
 			</div>
 			<div class="receipt">
 				<ul>
@@ -69,7 +71,7 @@ export default {
 			showDetails: false,
 			selectedOrder: null,
 			showReturn: false,
-			moneyInput: 0,
+			moneyInput: "0",
 			addedOrders: [],
 			pickupNameSet: '',
 			devTest: false
@@ -88,7 +90,7 @@ export default {
 		},
 		cancel() {
 			this.showDetails = false
-			this.moneyInput = 0
+			this.moneyInput = "0"
 			this.showReturn = false
 			this.devTest = false
 			useState('options').value.map(opt => {opt.selected = false})
@@ -145,6 +147,15 @@ export default {
 			}))
 			return categories
 		},
+		orderTypeCategories() {
+			let orderTypes = useState('orderTypes').value
+			let categories = [... new Set(orderTypes.map(type=>type.category))];
+			categories = categories.map(cat => ({
+				name: cat,
+				orderTypes: orderTypes.filter(type => type.category == cat)
+			}))
+			return categories
+		},
 		pickupName() {
 			if(useState('availableNames').value && useState('availableNames').value.length > 0) {
 				let availableNames = useState('availableNames').value.map(name => name.name)
@@ -168,6 +179,11 @@ export default {
     font-size: 3rem;
     margin: 0;
     text-align: center;
+  }
+
+  h2 {
+	margin: 0;
+	margin-top: 30px;
   }
 
   .wrapper {
@@ -210,6 +226,7 @@ export default {
 
   .orderMenu {
     flex-grow: 1;
+	overflow: scroll;
   }
 
   .buttons {

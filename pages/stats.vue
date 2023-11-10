@@ -1,12 +1,12 @@
 <template>
-	<div>
+	<div class="stats">
 		<BackButton back="/"/>
 		<h1>Stats</h1>
 		<div class="datePickers">
 			<div>Von:<vue-date-picker v-model="startDate" placeholder="Von" @update:model-value="updateOrders"/></div>
 			<div>Bis:<vue-date-picker v-model="endDate" placeholder="Bis" @update:model-value="updateOrders"/></div>
 		</div>
-		<ul>
+		<ul class="statList">
 			<li v-for="(value, name, index) in stats">
 				<p>{{ name }}</p>
 				<span>{{ value }}</span>
@@ -38,7 +38,7 @@ export default {
 		async updateOrders() {
 			if(this.startDate && this.endDate) {
 				const { data, error } = await useFetch("/api/orderStats", {
-					query: { startDate: new Date(this.startDate + 'T00:00').toISOString(), endDate: new Date(this.endDate + 'T00:00').toISOString() }
+					query: { startDate: new Date(this.startDate).toISOString(), endDate: new Date(this.endDate).toISOString() }
 				});
 				if(!error.value) {
 					console.log(data.value)
@@ -77,6 +77,12 @@ export default {
 h1 {
 	text-align: center;
 }
+
+.stats {
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+}
 .datePickers {
  	display: flex;
  	flex-direction: row;
@@ -93,9 +99,7 @@ ul {
   flex-wrap: wrap;
   padding: 0;
   margin: 0;
-  max-height: 50vh;
-  overflow: scroll;
-  padding-bottom: 80px;
+  height: 100%;
 }
 ul li {
   border-radius: 10px;
@@ -113,6 +117,11 @@ li p {
 
 li span {
 	font-size: 25px;
+}
+
+.statList {
+	overflow: scroll;
+	flex-grow: 1;
 }
 
 .input {
