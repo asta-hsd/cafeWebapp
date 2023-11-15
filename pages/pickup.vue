@@ -3,7 +3,7 @@
 		<!-- <BackButton back="/"/> -->
 		<!-- <h1>Asta Cafe</h1> -->
 		<div>
-			<h1>Zubereitung</h1>
+			<h1 @click="testSpeech('Cappucino für Loki')">Zubereitung</h1>
 			<ul>
 				<transition-group name="list" tag="div">
 					<template v-for="(name,index) in orderedOrders" :key="index">
@@ -51,6 +51,7 @@ export default {
 		return {
 			currentTime: new Date(),
 			maxPickupTime: 3*60,
+			voices: null
 		}
 	},
 	created() {
@@ -64,6 +65,9 @@ export default {
 			})
 		}, 1000)
 
+		
+
+
 		const config = useRuntimeConfig()
 		this.maxPickupTime = config.public.maxPickupTime
 		console.log(this.maxPickupTime)
@@ -73,9 +77,15 @@ export default {
 			console.log("new pickup")
 			let rand = Math.floor(Math.random() * (3 - 1) + 1);
 			let sound = new Audio('/sound'+rand+'.mp3')
-			sound.play()
+			// sound.play()
+			this.testSpeech(readyName)
 		})
 
+	},
+	mounted() {
+		window.speechSynthesis.onvoiceschanged = e => {
+			this.voices = window.speechSynthesis.getVoices();
+		}
 	},
 	computed: {
 		// activeNames() {
@@ -113,13 +123,12 @@ export default {
 			// console.log(this.currentTime + ", " + new Date(name.completedAt))
 			return Math.floor((this.currentTime - new Date(name.completedAt))/1000)
 		},
-		testSpeech(text) {
-			const synth = window.speechSynthesis;
+		async testSpeech(text) {
+			let synth = window.speechSynthesis
 			const utterThis = new SpeechSynthesisUtterance(text);
-			
-			const german = speechSynthesis.getVoices().filter(voice => voice.lang.startsWith('de'))[0]
+			const german = this.voices.filter(voice => voice.name == "Google Deutsch")[0]
 			utterThis.voice = german
-
+			console.log(german)
 			synth.speak(utterThis)
 		}
 	},

@@ -32,9 +32,9 @@ export default defineNitroPlugin((nitroApp) => {
 				const resp = await $fetch('/api/orders')
 				let orderName = resp.pickupNames.find(name => name.name == order.pickupName)
 
-				if(orderName.ready) {
-					socketServer.emit(SocketEvent.pickupOrder, orderName)
-				}
+				// if(orderName.ready) {
+					socketServer.emit(SocketEvent.pickupOrder, order.orderType+" für "+orderName.name)
+				// }
 			}
 		})
 
