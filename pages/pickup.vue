@@ -51,7 +51,8 @@ export default {
 		return {
 			currentTime: new Date(),
 			maxPickupTime: 3*60,
-			voices: null
+			synth: null,
+			voices: null,
 		}
 	},
 	created() {
@@ -83,8 +84,13 @@ export default {
 
 	},
 	mounted() {
-		window.speechSynthesis.onvoiceschanged = e => {
-			this.voices = window.speechSynthesis.getVoices();
+		this.synth = window.speechSynthesis;
+		if ("onvoiceschanged" in this.synth) {
+			this.synth.onvoiceschanged = () => {
+				this.voices = this.synth.getVoices();
+			}
+		} else {
+			this.voices = this.synth.getVoices();
 		}
 	},
 	computed: {
@@ -123,15 +129,13 @@ export default {
 			// console.log(this.currentTime + ", " + new Date(name.completedAt))
 			return Math.floor((this.currentTime - new Date(name.completedAt))/1000)
 		},
-		async testSpeech(text) {
-			let synth = window.speechSynthesis
+		testSpeech(text) {
 			const utterThis = new SpeechSynthesisUtterance(text);
-			const german = this.voices.filter(voice => voice.name == "Google Deutsch")[0]
-			utterThis.voice = german
-			console.log(german)
-			synth.speak(utterThis)
-		}
-	},
+			utterThis.voice = this.voices.filter(voice => voice.name == "Google Deutsch")[0]
+			this.synth.cancel();
+			this.synth.speak(utterThis)
+			
+		},
 // 	watch: {
 // 		// whenever question changes, this function will run
 // 		pickupNames(newNames, oldNames) {
@@ -145,6 +149,7 @@ export default {
 // 			})
 // 		}
 //   },
+}
 }
 </script>
 
