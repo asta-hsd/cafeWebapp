@@ -5,8 +5,8 @@
 	<ul>
         <transition-group name="list" tag="p">
             <template v-if="useState('orders').value" v-for="(order, index) in useState('orders').value">
-                <li v-if="order.status == OrderStatus.ordered" @click="clickedOrder=order">
-                    <span
+                <li v-if="order.status == OrderStatus.ordered">
+                    <span @click="clickedOrder=order"
                         >{{ order.orderType }}
                         {{
                             order.options.length > 0
