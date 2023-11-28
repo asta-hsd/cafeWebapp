@@ -18,16 +18,16 @@
 				<ul>
 					<li v-for="(order,index) in addedOrders">
 						<div class="order">
-							<!-- <svg @click="addedOrders.push(order)" class="btn" viewBox="0 0 23 23" fill="none" xmlns="http://www.w3.org/2000/svg" style="transform: rotate(45deg) scale(0.7);">
+							<svg @click="addedOrders.push({ ...order });console.log(addedOrders)" class="btn" viewBox="0 0 23 23" fill="none" xmlns="http://www.w3.org/2000/svg" style="transform: rotate(45deg) scale(0.7);">
 								<path d="M3 3L20 20M20 3L3 20" stroke="#80C587" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
-							</svg> -->
+							</svg>
 							<span style="flex-grow: 1">{{ order.orderType.name }}</span>
 							<span style="text-wrap: nowrap;">{{ order.price }} €</span>
 							<svg @click="addedOrders.splice(index,1)" class="btn" viewBox="0 0 23 23" fill="none" xmlns="http://www.w3.org/2000/svg">
 								<path d="M3 3L20 20M20 3L3 20" stroke="#B75252" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
 							</svg>
 						</div>
-						<p v-for="opt in order.options">+{{ opt }}</p>
+						<p style="margin-left: 30px;" v-for="opt in order.options">+{{ opt }}</p>
 					</li>
 				</ul>
 				<div class="sum">
@@ -100,8 +100,9 @@ export default {
 			useState('options').value.map(opt => {opt.selected = false})
 		},
 		sendOrder() {
+			console.log(this.addedOrders)
 			this.addedOrders.map((order) => {
-				console.log(order.orderType + ", " + order.orderType)
+				console.log(order.orderType)
 				if(order.orderType.ignoreOrders) {
 					order.status = OrderStatus.done
 					order.pickupName = ''
