@@ -2,7 +2,8 @@ export const SocketEvent = {
 	newOrder: 'newOrder',
 	updateOrder: 'updateOrder',
 	refreshOrders: 'refreshOrders',
-	pickupOrder: 'pickupOrder'
+	pickupOrder: 'pickupOrder',
+	deleteOrder: 'deleteOrder'
 }
 export const OrderStatus = {
 	ordered: 'ordered',

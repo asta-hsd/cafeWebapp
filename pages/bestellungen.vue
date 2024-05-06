@@ -3,7 +3,6 @@
 	<BackButton back="/"/>
 	<h1>Bestellungen</h1>
 	<ul>
-        <transition-group name="list" tag="p">
             <template v-if="useState('orders').value" v-for="(order, index) in useState('orders').value">
                 <li v-if="order.status == OrderStatus.ordered">
                     <span @click="clickedOrder=order"
@@ -47,7 +46,6 @@
                     </span>
                 </li>
             </template>
-        </transition-group>
 		<Modal :show="clickedOrder" @close="clickedOrder=null" buttonColor="black" closeOnBackdrop>
 			<div v-if="clickedOrder" class="orderDetails">
 				<h2>{{ clickedOrder.orderType }}</h2>
@@ -87,10 +85,10 @@ export default {
 <style lang="scss" scoped>
 
 h1 {
-	font-size: 35px;
-	margin: 0;
-	text-align: center
-}
+    font-size: 3rem;
+    margin: 0;
+    text-align: center;
+  }
 
 .bestellungen {
 	background: #FFF4DA;

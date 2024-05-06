@@ -1,80 +1,97 @@
 <template>
 	<div class="theke">
 		<BackButton back="/"/>
-		<h1>Theke</h1>
-		<div class="wrapper">
-			<div class="orderMenu">
-				<div v-for="category in orderTypeCategories">
-					<h2>{{category.name}}</h2>
-					<ul>
-						<li v-for="orderType in category.orderTypes" @click="clickMenuItem(orderType)">
-							<p>{{ orderType.name }}</p>
-							<span>{{ orderType.price }} €</span>	
-						</li>
-					</ul>
-				</div>
-			</div>
-			<div class="receipt">
-				<ul>
-					<li v-for="(order,index) in addedOrders">
-						<div class="order">
-							<svg @click="addedOrders.push({ ...order });console.log(addedOrders)" class="btn" viewBox="0 0 23 23" fill="none" xmlns="http://www.w3.org/2000/svg" style="transform: rotate(45deg) scale(0.7);">
-								<path d="M3 3L20 20M20 3L3 20" stroke="#80C587" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
-							</svg>
-							<span style="flex-grow: 1">{{ order.orderType.name }}</span>
-							<span style="text-wrap: nowrap;">{{ order.price }} €</span>
-							<svg @click="addedOrders.splice(index,1)" class="btn" viewBox="0 0 23 23" fill="none" xmlns="http://www.w3.org/2000/svg">
-								<path d="M3 3L20 20M20 3L3 20" stroke="#B75252" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
-							</svg>
+	<Tabs leftTitle="Theke" rightTitle="Aktive Bestellungen">
+			<template v-slot:leftTab>
+				<h1>Theke</h1>
+				<div class="wrapper">
+					<div class="orderMenu">
+						<div v-for="category in orderTypeCategories">
+							<h2>{{category.name}}</h2>
+							<ul>
+								<li v-for="orderType in category.orderTypes" @click="clickMenuItem(orderType)">
+									<p>{{ orderType.name }}</p>
+									<span>{{ orderType.price }} €</span>	
+								</li>
+							</ul>
 						</div>
-						<p style="margin-left: 30px;" v-for="opt in order.options">+{{ opt }}</p>
-					</li>
-				</ul>
-				<div class="sum">
-					Summe: <span>{{ totalPrice }} €</span>
-					<p>Name: {{ pickupName }}</p>
-					<div class="button" @click="sendOrder()">Bestellen</div>
-					<div class="button secondary" @click="showReturn=true">Rückgeld</div>
+					</div>
+					<div class="receipt">
+						<ul>
+							<li v-for="(order,index) in addedOrders" @click="editOrder(index)">
+								<div class="order">
+									<svg @click="addedOrders.push({ ...order });console.log(addedOrders)" class="btn" viewBox="0 0 23 23" fill="none" xmlns="http://www.w3.org/2000/svg" style="transform: rotate(45deg) scale(0.7);">
+										<path d="M3 3L20 20M20 3L3 20" stroke="#80C587" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+									</svg>
+									<span style="flex-grow: 1">{{ order.orderType.name }}</span>
+									<span style="text-wrap: nowrap;">{{ order.price }} €</span>
+									<svg @click.stop.prevent="addedOrders.splice(index,1)" class="btn" viewBox="0 0 23 23" fill="none" xmlns="http://www.w3.org/2000/svg">
+										<path d="M3 3L20 20M20 3L3 20" stroke="#B75252" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+									</svg>
+								</div>
+								<p style="margin-left: 30px;" v-for="opt in order.options">+{{ opt }}</p>
+							</li>
+						</ul>
+						<div class="sum">
+							Summe: <span>{{ totalPrice }} €</span>
+							<p>Name: {{ pickupName }}</p>
+							<div class="button" @click="sendOrder()">Bestellen</div>
+							<div class="button secondary" @click="showReturn=true">Rückgeld</div>
+						</div>
+					</div>
 				</div>
-			</div>
-		</div>
-		<Modal :show="showDetails" @close="cancel()" buttonColor="#736C5A">
-			<div v-if="selectedOrder" class="orderDetails">
-				<h2>{{ selectedOrder.name }}</h2>
-				<ul v-for="cat in optionCategories">
-					<li v-for="option in cat.options" @click="option.selected = !option.selected" :class="{selected: option.selected}" class="option">
-						<p>{{ option.name }}</p>
-						<span v-if="option.price">+{{ option.price }} €</span>
-					</li>
-				</ul>
-				<div class="buttons">
-					<span @click="cancel()">Cancel</span>
-					<span class="primary" @click="addOrder()">Hinzufügen</span>
-				</div>
-			</div>
-		</Modal>
 
-		<Modal :show="showReturn" @close="cancel()" buttonColor="#736C5A">
-			<div class="returnScreen">
-				<span class="input">Eingabe: {{ moneyInput }}€</span>
-				<span class="output">Rückgeld:  {{ Math.max(0,(moneyInput - totalPrice).toFixed(2)) }}€</span>
-				<SimpleKeyboard @onChange="onChange" @onKeyPress="onKeyPress" :input="moneyInput"/>
-				<div class="button" @click="sendOrder()">Bestellen</div>
-				<span style="font-size: 15px;"><input type="checkbox" v-model="devTest"/>Devtest</span>
-			</div>
-		</Modal>
+				<Modal :show="showReturn" @close="cancel()" buttonColor="#736C5A">
+					<div class="returnScreen">
+						<span class="input">Eingabe: {{ moneyInput }}€</span>
+						<span class="output">Rückgeld:  {{ Math.max(0,(moneyInput - totalPrice).toFixed(2)) }}€</span>
+						<SimpleKeyboard @onChange="onChange" @onKeyPress="onKeyPress" :input="moneyInput"/>
+						<div class="button" @click="sendOrder()">Bestellen</div>
+						<span style="font-size: 15px;"><input type="checkbox" v-model="devTest"/>Devtest</span>
+					</div>
+				</Modal>
+			</template>
+			<template v-slot:rightTab>
+				<Orders @orderClick="editActiveOrder"/>
+			</template>
+		</Tabs>
+		<Modal :show="showDetails" @close="cancel()" buttonColor="#736C5A">
+					<div class="orderDetails">
+						<h2>{{ selectedOrder.name }}</h2>
+						<ul v-for="cat in optionCategories">
+							<li v-for="option in cat.options" @click="option.selected = !option.selected" :class="{selected: option.selected}" class="option">
+								<p>{{ option.name }}</p>
+								<span v-if="option.price">+{{ option.price }} €</span>
+							</li>
+						</ul>
+						<div class="buttons">
+							<span @click="cancel()">Cancel</span>
+							<span v-if="detailEdit" class="primary" @click="saveOptions()">Speichern</span>
+							<span v-else-if="editActive" class="primary" @click="saveActiveOptions()">Speichern</span>
+							<span v-else class="primary" @click="addOrder()">Hinzufügen</span>
+						</div>
+					</div>
+				</Modal>
 	</div>
 </template>
+
+
+<script setup>
+definePageMeta({
+  layout: "defaulttab",
+});
+</script>
 
 <script>
 
 export default {
-	layout: 'default',
 	data() {
 		return {
 			showDetails: false,
 			selectedOrder: null,
 			showReturn: false,
+			detailEdit: false,
+			editActive: false,
 			moneyInput: "0",
 			addedOrders: [],
 			pickupNameSet: '',
@@ -97,6 +114,9 @@ export default {
 			this.moneyInput = "0"
 			this.showReturn = false
 			this.devTest = false
+			this.selectedOrder = null
+			this.detailEdit = false
+			this.editActive = false
 			useState('options').value.map(opt => {opt.selected = false})
 		},
 		sendOrder() {
@@ -137,6 +157,42 @@ export default {
 			} else {
 				this.showDetails = true;
 			}
+		},
+		editOrder(index) {
+			if(this.addedOrders[index].orderType.ignoreOrders) return
+			this.selectedOrder = index
+			useState('options').value.map(opt => {
+				opt.selected = this.addedOrders[index].options.includes(opt.name)
+			})
+			this.detailEdit = true
+			this.showDetails = true
+		},
+		editActiveOrder(id) {
+			this.selectedOrder = id
+			let order = useState('orders').value.find(order => order._id == id)
+			useState('options').value.map(opt => {
+				opt.selected = order.options.includes(opt.name)
+			})
+			this.editActive = true
+			this.showDetails = true
+		},
+		saveActiveOptions() {
+			let id = this.selectedOrder
+			let selectedOptions = useState('options').value.filter(option => option.selected)
+			let order = useState('orders').value.find(order => order._id == id)
+			order.options = selectedOptions.map(option => option.name)
+			order.price = order.orderType.price + selectedOptions.reduce((acc,option) => acc + option.price, 0)
+			const {$io} = useNuxtApp()
+			$io.emit(SocketEvent.updateOrder,order)
+			this.cancel()
+		},
+		saveOptions() {
+			let selectedOptions = useState('options').value.filter(option => option.selected)
+			console.log(this.addedOrders)
+			let order = this.addedOrders[this.selectedOrder]
+			order.options = selectedOptions.map(option => option.name)
+			order.price = order.orderType.price + selectedOptions.reduce((acc,option) => acc + option.price, 0)
+			this.cancel()
 		}
 	},
 	computed: {
@@ -177,9 +233,6 @@ export default {
 
 .theke {
   height: 100%;
-  display: flex;
-  flex-direction: column;
-
   h1 {
     font-size: 3rem;
     margin: 0;
@@ -193,26 +246,29 @@ export default {
 
   .wrapper {
     display: flex;
-    height: 0%;
+    max-height: 100%;
+	height: 100%;
     width: 100%;
-    flex-grow: 1;
+
+	
   }
 
   ul {
-    list-style: none;
-    display: flex;
-    flex-wrap: wrap;
-    padding: 0;
-    margin: 0;
-    max-height: 100%;
-    width: auto;
-    overflow: scroll;
-  }
+		list-style: none;
+		display: flex;
+		flex-wrap: wrap;
+		padding: 0;
+		margin: 0;
+		max-height: 100%;
+		width: auto;
+		overflow: scroll;
+	}
 
   .orderDetails {
     background: #FFF4DA;
     padding: 30px;
     width: 80vw;
+	//height: 80vh;
     max-width: 1000px;
 
     h2 {
@@ -231,6 +287,7 @@ export default {
 
   .orderMenu {
     flex-grow: 1;
+	height: 100%;
 	overflow: scroll;
   }
 
@@ -284,6 +341,7 @@ export default {
     flex-direction: column;
     justify-content: space-between;
     font-size: 20px;
+	margin-bottom: 20px;
 
     .order {
       display: flex;

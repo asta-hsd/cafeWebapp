@@ -58,7 +58,8 @@ export default {
 
 .backBtn {
 	position: absolute;
-	top: 50px;
+	top: 45px;
+	left: 60px;
 	width: 40px;
 	z-index: 1;
 }
@@ -66,7 +67,7 @@ export default {
 .fullScreen {
 	position: absolute;
 	right: 60px;
-	top: 30px;
+	top: 45px;
 	width: 30px;
 }
 </style>

@@ -25,6 +25,15 @@ export default defineNitroPlugin((nitroApp) => {
 			socketServer.emit(SocketEvent.refreshOrders)
 		})
 
+		socket.on(SocketEvent.deleteOrder, async (order) => {
+			await OrderModel.findOneAndDelete({_id: order._id})
+	
+			console.log('deleted order')
+
+
+			socketServer.emit(SocketEvent.refreshOrders)
+		})
+
 		socket.on(SocketEvent.updateOrder, async (order) => {
 			await OrderModel.findOneAndUpdate({_id: order._id},order)
 			socketServer.emit(SocketEvent.refreshOrders)
