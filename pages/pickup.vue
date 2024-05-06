@@ -74,42 +74,15 @@ export default {
 		console.log(this.maxPickupTime)
 
 		const { $io } = useNuxtApp()
-		$io.on(SocketEvent.pickupOrder,async (readyName) => {
+		$io.on(SocketEvent.pickupOrder,async () => {
 			console.log("new pickup")
 			let rand = Math.floor(Math.random() * (3 - 1) + 1);
 			let sound = new Audio('/sound'+rand+'.mp3')
-			// sound.play()
-			this.testSpeech(readyName)
+			sound.play()
 		})
 
 	},
-	mounted() {
-		this.synth = window.speechSynthesis;
-		if ("onvoiceschanged" in this.synth) {
-			this.synth.onvoiceschanged = () => {
-				this.voices = this.synth.getVoices();
-			}
-		} else {
-			this.voices = this.synth.getVoices();
-		}
-	},
 	computed: {
-		// activeNames() {
-		// 	let activeOrders = useState('orders').value.filter(order => order.status == OrderStatus.ordered || order.status == OrderStatus.pickup)
-		// 	let names = [... new Set(activeOrders.map(order=>order.pickupName))];
-			
-		// 	names = names.map(name => {
-		// 		let matchingOrders = activeOrders.filter(order => order.pickupName == name)
-		// 		return {
-		// 			name: name,
-		// 			orders: matchingOrders,
-		// 			ready: matchingOrders.every(order => order.status === OrderStatus.pickup)
-		// 		}
-		// 	})
-		// 	console.log(names)
-		// 	this.pickupNames = names.filter(name => name.ready)
-		// 	return names
-		// }
 		orderedOrders() {
 			return useState('pickupNames').value.sort((a,b) => new Date(a.orders[0].createdAt) - new Date(b.orders[0].createdAt))
 		},
@@ -126,30 +99,9 @@ export default {
 			})
 		},
 		getElapsedTime(name) {
-			// console.log(this.currentTime + ", " + new Date(name.completedAt))
 			return Math.floor((this.currentTime - new Date(name.completedAt))/1000)
 		},
-		testSpeech(text) {
-			const utterThis = new SpeechSynthesisUtterance(text);
-			utterThis.voice = this.voices.filter(voice => voice.name == "Google Deutsch")[0]
-			this.synth.cancel();
-			this.synth.speak(utterThis)
-			
-		},
-// 	watch: {
-// 		// whenever question changes, this function will run
-// 		pickupNames(newNames, oldNames) {
-// 			let addedNames = newNames.filter(x => !oldNames.includes(x));
-// 			const synth = window.speechSynthesis;
-// 			console.log(synth.getVoices())
-// 			addedNames.map(name => {
-// 				const utterThis = new SpeechSynthesisUtterance(name.name);
-// 				synth.speak(utterThis)
-
-// 			})
-// 		}
-//   },
-}
+	}
 }
 </script>
 
