@@ -1,7 +1,7 @@
 <template>
 	<h1>Aktive Bestellungen</h1>
 	<ul>
-        <li v-for="(order, index) in useState('orders').value.sort(sortByDate).reverse()" @click="$emit('orderClick', order._id)">
+        <li v-for="(order, index) in [...useState('orders').value].sort(sortByDate).reverse()" @click="$emit('orderClick', order._id)">
             <span>{{ order.orderType }}
                         {{
                             order.options.length > 0
