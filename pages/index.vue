@@ -5,14 +5,8 @@
 			<NuxtLink to="/bestellungen">
 				<li>Bestellungen</li>
 			</NuxtLink>
-			<NuxtLink to="/theke">
-				<li>Theke</li>
-			</NuxtLink>
 			<NuxtLink to="/pickup">
 				<li>Abholung</li>
-			</NuxtLink>
-			<NuxtLink to="/stats">
-				<li>Stats</li>
 			</NuxtLink>
 		</ul>
 	</div>

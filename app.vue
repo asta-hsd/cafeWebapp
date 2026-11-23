@@ -12,14 +12,7 @@
 		if(!error.value) {
 			useState('orders').value = data.value.orders
 			useState('pickupNames').value = data.value.pickupNames
-			useState('availableNames').value = data.value.availableNames
 		}
-	}
-
-	const {data,error} = await useFetch("/api/orderMenu");
-	if(!error.value) {
-		useState('orderTypes').value = data.value.orderTypes
-		useState('options').value = data.value.options
 	}
 
 	loadOrders()

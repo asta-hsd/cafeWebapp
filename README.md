@@ -1,75 +1,26 @@
-# Nuxt 3 Minimal Starter
+# Asta Café – Bestellanzeige
 
-Look at the [Nuxt 3 documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
+Zahlungen vom SumUp-Terminal / der SumUp-App werden automatisch als Bestellungen übernommen und auf zwei Seiten angezeigt:
+
+- `/bestellungen` – Liste für die Theke/Küche, Haken = Bestellung ist fertig
+- `/pickup` – Anzeige für den Gast-Bildschirm: „Zubereitung“ und „Abholung“ mit Countdown, Klick auf eine Nummer = abgeholt
+
+Jeder Zahlung wird automatisch eine Abholnummer (1–99) zugewiesen.
 
 ## Setup
 
-Make sure to install the dependencies:
-
-```bash
-# npm
-npm install
-
-# pnpm
-pnpm install
-
-# yarn
+```
+cp .env.example .env   # SumUp-Zugangsdaten eintragen
 yarn install
-
-# bun
-bun install
-```
-
-## Development Server
-
-Start the development server on `http://localhost:3000`:
-
-```bash
-# npm
-npm run dev
-
-# pnpm
-pnpm run dev
-
-# yarn
 yarn dev
-
-# bun
-bun run dev
 ```
 
-## Production
+Bestellungen werden in `data/orders.json` gespeichert (anderer Ordner: `DATA_DIR`).
+Ein Poller in `server/plugins/sumup.js` fragt alle `SUMUP_POLL_SECONDS` Sekunden die SumUp-Transaktionshistorie ab.
 
-Build the application for production:
+## Testen ohne Terminal (nur Dev-Modus)
 
-```bash
-# npm
-npm run build
-
-# pnpm
-pnpm run build
-
-# yarn
-yarn build
-
-# bun
-bun run build
 ```
-
-Locally preview production build:
-
-```bash
-# npm
-npm run preview
-
-# pnpm
-pnpm run preview
-
-# yarn
-yarn preview
-
-# bun
-bun run preview
+curl -X POST localhost:3000/api/sumupTest -H 'content-type: application/json' \
+  -d '{"name":"7","orderType":"Cappuccino","price":2.5}'
 ```
-
-Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.

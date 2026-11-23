@@ -10,8 +10,6 @@ export default defineNuxtConfig({
 		}
 	},
 	runtimeConfig: {
-		dbUrl: process.env.DATABASE_URL,
-		dbName: process.env.DBNAME,
 		public: {
 			socketPort: process.env.SOCKET_PORT,
 			socketUrl: process.env.SOCKET_URL,
@@ -19,8 +17,7 @@ export default defineNuxtConfig({
 		}
 	},
 	plugins: [
-		'./plugins/socket.io',
-		'./plugins/VueDatePicker'
+		'./plugins/socket.io'
 	],
 	// nitro: {
 	// 	plugins: [
