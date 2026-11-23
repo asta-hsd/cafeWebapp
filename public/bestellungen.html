@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bestellungen</title><link rel="stylesheet" href="/style.css"></head>
+<body><div class="page">
+	<h1>Bestellungen</h1>
+	<div id="root" class="orders"></div>
+</div>
+<script src="/app.js"></script>
+<script>
+const root = document.getElementById('root')
+const time = t => new Date(t).toLocaleTimeString('de', { hour: '2-digit', minute: '2-digit' })
+
+connect(s => {
+	const open = s.orders.filter(o => !o.readyAt)
+	if (!open.length) return root.replaceChildren(el('p', 'empty', 'Keine offenen Bestellungen'))
+	root.replaceChildren(...open.map(o => {
+		const items = o.items.map((it, i) => {
+			const li = el('li', it.done ? 'done' : '', el('div', 'box'), it.label)
+			li.firstChild.innerHTML = CHECK
+			li.onclick = () => api('toggle', { id: o.id, i })
+			return li
+		})
+		return el('div', 'card', el('div', 'head', el('h2', '', o.name), el('small', '', time(o.createdAt) + ' Uhr')), el('ul', '', ...items))
+	}))
+})
+</script></body></html>

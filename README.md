@@ -1,26 +1,13 @@
-# Asta Café – Bestellanzeige
+# Café-Webapp
 
-Zahlungen vom SumUp-Terminal / der SumUp-App werden automatisch als Bestellungen übernommen und auf zwei Seiten angezeigt:
-
-- `/bestellungen` – Liste für die Theke/Küche, Haken = Bestellung ist fertig
-- `/pickup` – Anzeige für den Gast-Bildschirm: „Zubereitung“ und „Abholung“ mit Countdown, Klick auf eine Nummer = abgeholt
-
-Jeder Zahlung wird automatisch eine Abholnummer (1–99) zugewiesen.
-
-## Setup
+Zeigt SumUp-Verkäufe als Bestellungen an. Keine Abhängigkeiten, nur Node >= 20.6.
 
 ```
-cp .env.example .env   # SumUp-Zugangsdaten eintragen
-yarn install
-yarn dev
+cp .env.example .env   # SumUp-Key + Merchant-Code eintragen
+npm start
 ```
 
-Bestellungen werden in `data/orders.json` gespeichert (anderer Ordner: `DATA_DIR`).
-Ein Poller in `server/plugins/sumup.js` fragt alle `SUMUP_POLL_SECONDS` Sekunden die SumUp-Transaktionshistorie ab.
-
-## Testen ohne Terminal (nur Dev-Modus)
-
-```
-curl -X POST localhost:3000/api/sumupTest -H 'content-type: application/json' \
-  -d '{"name":"7","orderType":"Cappuccino","price":2.5}'
-```
+- `/bestellungen` – offene Bestellungen, Artikel abhaken
+- `/pickup` – 2. Display: links Zubereitung, rechts Abholung (Klick = abgeholt)
+- `names.json` – Liste möglicher Abholnamen (es wird immer ein gerade freier Name vergeben)
+- `ENABLE_TEST=1` -> `curl -X POST localhost:3000/api/test -H 'content-type: application/json' -d '{"items":["Cappuccino","Muffin"]}'`

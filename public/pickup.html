@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Abholung</title><link rel="stylesheet" href="/style.css"></head>
+<body class="display">
+<div class="pickup">
+	<div><h1>Zubereitung</h1><div id="prep" class="list"></div></div>
+	<div><h1>Abholung</h1><div id="ready" class="list"></div></div>
+</div>
+<script src="/app.js"></script>
+<script>
+let maxPickup = 180, offset = 0
+
+function card(o, ready) {
+	const items = o.items.map(it => {
+		const s = el('span', '', it.label + ' ')
+		if (it.done) s.insertAdjacentHTML('beforeend', CHECK)
+		return s
+	})
+	const c = el('div', 'card' + (ready ? ' ready' : ''), el('p', '', o.name), ...items.flatMap(s => [s, el('br')]))
+	if (ready) { c.dataset.readyAt = o.readyAt; c.onclick = () => api('pickup', { id: o.id }) }
+	return c
+}
+
+connect(s => {
+	maxPickup = s.maxPickup; offset = s.offset
+	prep.replaceChildren(...s.orders.filter(o => !o.readyAt).map(o => card(o, false)))
+	ready.replaceChildren(...s.orders.filter(o => o.readyAt).sort((a, b) => a.readyAt - b.readyAt).map(o => card(o, true)))
+	tick()
+}, () => new Audio('/sound' + (1 + Math.floor(Math.random() * 2)) + '.mp3').play().catch(() => {}))
+
+// Zeitbalken der Abholung (ändert nur Styles, damit Klicks nicht verloren gehen)
+function tick() {
+	for (const c of document.querySelectorAll('.ready')) {
+		const left = 100 - ((Date.now() - offset - c.dataset.readyAt) / 1000 / maxPickup) * 100
+		c.style.setProperty('--perc', Math.max(0, left) + '%')
+		c.style.setProperty('--hue', Math.max(0, left))
+	}
+}
+setInterval(tick, 1000)
+</script></body></html>
