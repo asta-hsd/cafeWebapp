@@ -13,6 +13,8 @@ const FILE = path.join(DATA, 'state.json')
 const PORT = Number(process.env.PORT) || 3000
 const MAX_PICKUP = Number(process.env.MAX_PICKUP_TIME) || 180 // Sekunden
 const IGNORE_MODIFIER = /pfand/i // z.B. Recup-Becherpfand
+// Nur Artikel dieser SumUp-Kategorie kommen ins System (Groß-/Kleinschreibung egal)
+const ITEM_CATEGORY = (process.env.ITEM_CATEGORY || 'CafeSystem').trim().toLowerCase()
 
 const NAMES = JSON.parse(readFileSync(path.join(ROOT, 'names.json'), 'utf8'))
 
@@ -101,22 +103,50 @@ function itemLabel(item) {
 	const mods = (item.modifiers || []).map(m => m.name).filter(n => n && !IGNORE_MODIFIER.test(n))
 	return (variant || item.name) + (mods.length ? ` (${mods.join(', ')})` : '')
 }
+
+// Artikel gehört zur Kategorie ITEM_CATEGORY (sale.items[].categories[].name)
+const isInCategory = item => (item.categories || []).some(c => c.name?.trim().toLowerCase() === ITEM_CATEGORY)
+
 const saleLabels = sale => (sale.items || [])
-	.filter(i => i.type !== 'FEE')
+	.filter(i => i.type !== 'FEE' && isInCategory(i))
 	.flatMap(i => Array(Math.max(1, Math.round(i.quantity || 1))).fill(itemLabel(i)))
+
+// Nur Verkäufe aus diesen Verkaufskanälen abfragen (Standard: nur die Kasse/POS), Komma-getrennt
+const SALES_CHANNELS = (process.env.SALES_CHANNELS || 'POS').split(',').map(c => c.trim().toUpperCase()).filter(Boolean)
+const SALES_URL = () => `https://api.sumup.com/v1.0/merchants/${encodeURIComponent(merchant)}/sales`
+const skipped = new Set() // Verkäufe ohne passende Artikel (nur im Speicher), damit sie nicht bei jedem Poll neu geladen werden
+
+async function sumup(url, body) {
+	const res = await fetch(url, {
+		method: body ? 'POST' : 'GET',
+		headers: { Authorization: `Bearer ${apiKey}`, 'User-Agent': 'cafeWebapp', ...(body && { 'Content-Type': 'application/json' }) },
+		body: body && JSON.stringify(body),
+	})
+	if (!res.ok) throw new Error(`${res.status} ${await res.text()}`)
+	return res.json()
+}
+
+// Hat die Zeile schon Artikel samt Kategorien? Sonst muss der Verkauf einzeln geladen werden.
+const hasCategories = sale => Array.isArray(sale.items) && sale.items.every(i => i.type === 'FEE' || 'categories' in i)
 
 async function pollSumup() {
 	const since = pollSumup.since
 	try {
-		const url = `https://api.sumup.com/v1.0/merchants/${encodeURIComponent(merchant)}/sales?limit=25`
-		const res = await fetch(url, { headers: { Authorization: `Bearer ${apiKey}`, 'User-Agent': 'cafeWebapp' } })
-		if (!res.ok) throw new Error(`${res.status} ${await res.text()}`)
-		const time = s => new Date(s.closed_at || s.created_at).getTime()
-		const sales = ((await res.json()).items || []).sort((a, b) => time(a) - time(b)) // älteste zuerst
-		for (const sale of sales) {
-			if (sale.state !== 'CLOSED' || time(sale) < since || seen.includes(sale.id)) continue
+		// Filter serverseitig: nur abgeschlossene Verkäufe der gewünschten Kanäle seit Serverstart
+		const found = await sumup(`${SALES_URL()}/search`, {
+			sales_channels: SALES_CHANNELS,
+			sale_statuses: ['CLOSED'],
+			start_date: new Date(since).toISOString(),
+			pagination_limit: 25,
+		})
+		const sales = (found.items || []).slice().reverse() // API liefert neueste zuerst -> älteste zuerst abarbeiten
+		for (let sale of sales) {
+			if ((sale.state && sale.state !== 'CLOSED') || seen.includes(sale.id) || skipped.has(sale.id)) continue
+			if (!hasCategories(sale)) sale = await sumup(`${SALES_URL()}/${encodeURIComponent(sale.id)}`)
+			if (process.env.DEBUG_SALES === '1') console.log('[sale]', sale.id, JSON.stringify(sale.items))
 			const labels = saleLabels(sale)
 			if (labels.length) addOrder(labels, sale.id)
+			else { if (skipped.size > 500) skipped.clear(); skipped.add(sale.id) }
 		}
 	} catch (e) {
 		console.log('[sumup]', e.message.slice(0, 300))
