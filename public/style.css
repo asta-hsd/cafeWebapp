@@ -26,6 +26,8 @@ ul { list-style: none; margin: 0; padding: 0; }
 .orders .head small { opacity: .7; }
 .orders li { display: flex; align-items: center; gap: 12px; padding: 10px 0; font-size: 1.4rem; cursor: pointer; border-top: 1px solid #0001; }
 .orders li.done { opacity: .4; text-decoration: line-through; }
+.togo { flex: none; margin-left: auto; display: flex; }
+.togo svg { width: 34px; height: 34px; }
 .box { flex: none; width: 35px; height: 35px; border-radius: 10px; background: #FFFBF1; display: flex; align-items: center; justify-content: center; }
 .box svg { width: 20px; display: none; }
 li.done .box svg { display: block; }

@@ -12,14 +12,14 @@ const DATA = path.resolve(process.env.DATA_DIR || path.join(ROOT, 'data'))
 const FILE = path.join(DATA, 'state.json')
 const PORT = Number(process.env.PORT) || 3000
 const MAX_PICKUP = Number(process.env.MAX_PICKUP_TIME) || 180 // Sekunden
-const IGNORE_MODIFIER = /pfand/i // z.B. Recup-Becherpfand
+const TOGO_MODIFIER = /pfand/i // Modifier, der "ToGo" bedeutet (z. B. "Recup-Becherpfand"): kein Text im Label, dafür ToGo-Icon
 // Nur Artikel dieser SumUp-Kategorie kommen ins System (Groß-/Kleinschreibung egal)
 const ITEM_CATEGORY = (process.env.ITEM_CATEGORY || 'CafeSystem').trim().toLowerCase()
 
 const NAMES = JSON.parse(readFileSync(path.join(ROOT, 'names.json'), 'utf8'))
 
 // ---------- Zustand ----------
-// order = { id, saleId, name, createdAt, readyAt|null, items: [{ label, done }] }
+// order = { id, saleId, name, createdAt, readyAt|null, items: [{ label, togo, done }] }
 let orders = []
 let nextName = null // Name, den die nächste eingehende Bestellung bekommt (wird auf dem /next-Screen angezeigt)
 let seen = [] // bereits verarbeitete SumUp-Sale-IDs (damit nach Abholung nichts neu angelegt wird)
@@ -54,12 +54,12 @@ function freeName() {
 function addOrder(labels, saleId = null) {
 	const name = nextName || freeName()
 	nextName = null // sonst würde freeName() den eben vergebenen Namen für gesperrt halten
-	const order = { id: randomUUID(), saleId, name, createdAt: Date.now(), readyAt: null, items: labels.map(label => ({ label, done: false })) }
+	const order = { id: randomUUID(), saleId, name, createdAt: Date.now(), readyAt: null, items: labels.map(l => ({ label: l.label ?? l, togo: !!l.togo, done: false })) }
 	orders.push(order)
 	nextName = freeName() // direkt den neuen nächsten Namen festlegen
 	if (saleId) seen.push(saleId)
 	save(); broadcast()
-	console.log('[order]', order.name, '->', labels.join(', '))
+	console.log('[order]', order.name, '->', labels.map(l => (l.label ?? l) + (l.togo ? ' [ToGo]' : '')).join(', '))
 	return order
 }
 
@@ -97,11 +97,11 @@ setInterval(() => {
 const apiKey = process.env.SUMUP_API_KEY
 const merchant = process.env.SUMUP_MERCHANT_CODE
 
-// Bei "Kuchen" steht die Sorte in features[variant_name], sonst ist name der Artikel
-function itemLabel(item) {
-	const variant = (item.features || []).find(f => f.name === 'variant_name')?.value
-	const mods = (item.modifiers || []).map(m => m.name).filter(n => n && !IGNORE_MODIFIER.test(n))
-	return (variant || item.name) + (mods.length ? ` (${mods.join(', ')})` : '')
+// Artikelname plus Modifier (z. B. "Cappuccino (Hafermilch)"); ToGo-Modifier (Pfand) werden nicht ins Label geschrieben, sondern setzen togo
+function orderItem(item) {
+	const mods = (item.modifiers || []).map(m => m.name).filter(Boolean)
+	const shown = mods.filter(n => !TOGO_MODIFIER.test(n))
+	return { label: item.name + (shown.length ? ` (${shown.join(', ')})` : ''), togo: mods.some(n => TOGO_MODIFIER.test(n)) }
 }
 
 // Artikel gehört zur Kategorie ITEM_CATEGORY (sale.items[].categories[].name)
@@ -109,7 +109,7 @@ const isInCategory = item => (item.categories || []).some(c => c.name?.trim().to
 
 const saleLabels = sale => (sale.items || [])
 	.filter(i => i.type !== 'FEE' && isInCategory(i))
-	.flatMap(i => Array(Math.max(1, Math.round(i.quantity || 1))).fill(itemLabel(i)))
+	.flatMap(i => Array(Math.max(1, Math.round(i.quantity || 1))).fill(orderItem(i)))
 
 // Nur Verkäufe aus diesen Verkaufskanälen abfragen (Standard: nur die Kasse/POS), Komma-getrennt
 const SALES_CHANNELS = (process.env.SALES_CHANNELS || 'POS').split(',').map(c => c.trim().toUpperCase()).filter(Boolean)
