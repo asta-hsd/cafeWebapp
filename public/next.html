@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nächster Name</title><link rel="stylesheet" href="/style.css"></head>
+<body class="display">
+<div class="next">
+	<h2>Der nächste Name ist</h2>
+	<div id="name" class="card"></div>
+</div>
+<script src="/app.js"></script>
+<script>
+const box = document.getElementById('name')
+let last = null
+
+connect(s => {
+	if (s.nextName === last) return
+	last = s.nextName
+	box.textContent = s.nextName || '…'
+	box.classList.remove('flip'); void box.offsetWidth; box.classList.add('flip') // kurze Animation beim Wechsel
+})
+</script></body></html>

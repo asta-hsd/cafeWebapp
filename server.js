@@ -19,24 +19,27 @@ const NAMES = JSON.parse(readFileSync(path.join(ROOT, 'names.json'), 'utf8'))
 // ---------- Zustand ----------
 // order = { id, saleId, name, createdAt, readyAt|null, items: [{ label, done }] }
 let orders = []
+let nextName = null // Name, den die nächste eingehende Bestellung bekommt (wird auf dem /next-Screen angezeigt)
 let seen = [] // bereits verarbeitete SumUp-Sale-IDs (damit nach Abholung nichts neu angelegt wird)
 let saveTimer
 
 async function load() {
 	await fs.mkdir(DATA, { recursive: true })
-	try { ({ orders, seen } = JSON.parse(await fs.readFile(FILE, 'utf8'))) } catch {}
+	try { ({ orders, seen, nextName } = JSON.parse(await fs.readFile(FILE, 'utf8'))) } catch {}
+	if (!nextName || orders.some(o => o.name === nextName)) nextName = freeName()
 }
 function save() {
 	clearTimeout(saveTimer)
 	saveTimer = setTimeout(() => {
 		seen = seen.slice(-500)
-		fs.writeFile(FILE, JSON.stringify({ orders, seen })).catch(e => console.log('[save]', e.message))
+		fs.writeFile(FILE, JSON.stringify({ orders, seen, nextName })).catch(e => console.log('[save]', e.message))
 	}, 200)
 }
 
-// zufälliger Name, der gerade von keiner aktiven Bestellung benutzt wird
+// zufälliger Name, der gerade von keiner aktiven Bestellung (und nicht als nächster Name) vergeben ist
 function freeName() {
 	const used = new Set(orders.map(o => o.name))
+	if (nextName) used.add(nextName)
 	const free = NAMES.filter(n => !used.has(n))
 	if (free.length) return free[Math.floor(Math.random() * free.length)]
 	// Liste aufgebraucht: "Loki 2", "Loki 3", ...
@@ -47,8 +50,11 @@ function freeName() {
 }
 
 function addOrder(labels, saleId = null) {
-	const order = { id: randomUUID(), saleId, name: freeName(), createdAt: Date.now(), readyAt: null, items: labels.map(label => ({ label, done: false })) }
+	const name = nextName || freeName()
+	nextName = null // sonst würde freeName() den eben vergebenen Namen für gesperrt halten
+	const order = { id: randomUUID(), saleId, name, createdAt: Date.now(), readyAt: null, items: labels.map(label => ({ label, done: false })) }
 	orders.push(order)
+	nextName = freeName() // direkt den neuen nächsten Namen festlegen
 	if (saleId) seen.push(saleId)
 	save(); broadcast()
 	console.log('[order]', order.name, '->', labels.join(', '))
@@ -72,7 +78,7 @@ function pickup(id) {
 
 // ---------- Live-Updates (Server-Sent Events) ----------
 const clients = new Set()
-const view = () => ({ now: Date.now(), maxPickup: MAX_PICKUP, orders })
+const view = () => ({ now: Date.now(), maxPickup: MAX_PICKUP, nextName, orders })
 function broadcast(event, data) {
 	const msg = event ? `event: ${event}\ndata: ${data}\n\n` : `data: ${JSON.stringify(view())}\n\n`
 	for (const res of clients) res.write(msg)
@@ -119,7 +125,7 @@ async function pollSumup() {
 
 // ---------- HTTP ----------
 const MIME = { '.html': 'text/html; charset=utf-8', '.css': 'text/css', '.js': 'text/javascript', '.mp3': 'audio/mpeg', '.ttf': 'font/ttf', '.ico': 'image/x-icon' }
-const PAGES = { '/': 'index.html', '/bestellungen': 'bestellungen.html', '/pickup': 'pickup.html' }
+const PAGES = { '/': 'index.html', '/bestellungen': 'bestellungen.html', '/pickup': 'pickup.html', '/next': 'next.html' }
 
 const readJson = req => new Promise(resolve => {
 	let b = ''
